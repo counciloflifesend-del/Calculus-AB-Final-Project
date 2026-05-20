@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculus Chess</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>Calculus Chess</h1>
+          <p>International chess with AP Calculus AB challenges every third move.</p>
+        </div>
+        <div class="top-actions">
+          <button id="tutorialButton" class="ghost-button" type="button">Tutorial</button>
+          <button id="recallButton" class="ghost-button" type="button">Recall</button>
+          <button id="newGameButton" class="primary-button" type="button">New Game</button>
+        </div>
+      </header>
+
+      <section class="game-layout">
+        <aside class="player-panel white-panel" aria-label="White player panel">
+          <div class="player-heading">
+            <span>White</span>
+            <strong id="whiteClock">20:00</strong>
+          </div>
+          <div class="mini-row">
+            <span>Moves toward quiz</span>
+            <b id="whiteQuizProgress">0 / 3</b>
+          </div>
+          <div>
+            <span class="panel-label">Captured</span>
+            <div id="blackCaptured" class="piece-strip"></div>
+          </div>
+          <div>
+            <span class="panel-label">Sacrificed</span>
+            <div id="whiteSacrificed" class="piece-strip"></div>
+          </div>
+        </aside>
+
+        <section class="board-stage" aria-label="Chess board area">
+          <div class="status-ribbon">
+            <span id="turnBadge">White to move</span>
+            <span id="engineBadge">Local engine ready</span>
+          </div>
+          <div id="board" class="chessboard" aria-label="Calculus chess board"></div>
+          <div class="board-footer">
+            <span id="selectedSquareText">Select a piece to begin.</span>
+            <span id="fenText">startpos</span>
+          </div>
+        </section>
+
+        <aside class="control-panel" aria-label="Game controls and calculus topics">
+          <section class="control-block">
+            <h2>Mode</h2>
+            <div class="segmented-control" role="group" aria-label="Game mode">
+              <button id="pvpMode" class="segment active" type="button">Player vs Player</button>
+              <button id="cpuMode" class="segment" type="button">Player vs Computer</button>
+            </div>
+            <label class="range-label" for="eloSlider">
+              <span>Computer ELO</span>
+              <strong id="eloValue">1200</strong>
+            </label>
+            <input id="eloSlider" type="range" min="400" max="2400" step="100" value="1200" />
+          </section>
+
+          <section class="control-block">
+            <h2>Black</h2>
+            <div class="timer-card black-timer">
+              <span>Clock</span>
+              <strong id="blackClock">20:00</strong>
+            </div>
+            <div class="mini-row">
+              <span>Moves toward quiz</span>
+              <b id="blackQuizProgress">0 / 3</b>
+            </div>
+            <div>
+              <span class="panel-label">Captured</span>
+              <div id="whiteCaptured" class="piece-strip"></div>
+            </div>
+            <div>
+              <span class="panel-label">Sacrificed</span>
+              <div id="blackSacrificed" class="piece-strip"></div>
+            </div>
+          </section>
+
+          <section class="control-block topic-block">
+            <h2>AP Calc Coverage</h2>
+            <div id="topicGrid" class="topic-grid"></div>
+          </section>
+
+          <section class="control-block log-block">
+            <h2>Game Log</h2>
+            <ol id="gameLog" class="game-log"></ol>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <div id="tutorialModal" class="modal-layer visible" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
+      <div class="modal-card tutorial-card">
+        <button id="closeTutorialX" class="icon-button" type="button" aria-label="Close tutorial">×</button>
+        <h2 id="tutorialTitle">Quick Tutorial</h2>
+        <p>Play normal international chess on a calculus-themed board. White and Black each begin with 20 minutes.</p>
+        <ul>
+          <li>After each player makes three legal moves, that player answers an AP Calculus AB multiple-choice question.</li>
+          <li>A correct answer adds five minutes to that player’s clock.</li>
+          <li>A wrong answer pauses the game until that player sacrifices any own non-king piece.</li>
+          <li>Recall takes back the latest move; against the computer it recalls the full human-plus-bot turn.</li>
+          <li>Player vs Computer uses a local browser-side engine with adjustable ELO.</li>
+        </ul>
+        <button id="closeTutorialButton" class="primary-button" type="button">Start Playing</button>
+      </div>
+    </div>
+
+    <div id="quizModal" class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
+      <div class="modal-card quiz-card">
+        <div class="modal-kicker" id="quizTopic">Limits</div>
+        <h2 id="quizTitle">Calculus Challenge</h2>
+        <p id="quizQuestion"></p>
+        <div id="answerChoices" class="answer-grid"></div>
+      </div>
+    </div>
+
+    <div id="sacrificeModal" class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="sacrificeTitle">
+      <div class="modal-card sacrifice-card">
+        <h2 id="sacrificeTitle">Sacrifice Required</h2>
+        <p id="sacrificeText">Choose one of your non-king pieces to remove from the board.</p>
+        <div id="sacrificeChoices" class="sacrifice-grid"></div>
+      </div>
+    </div>
+
+    <div id="promotionModal" class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="promotionTitle">
+      <div class="modal-card promotion-card">
+        <h2 id="promotionTitle">Promote Pawn</h2>
+        <div id="promotionChoices" class="promotion-grid"></div>
+      </div>
+    </div>
+
+    <div id="gameOverModal" class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+      <div class="modal-card game-over-card">
+        <div id="gameOverKicker" class="modal-kicker">Game Over</div>
+        <h2 id="gameOverTitle">Final Position</h2>
+        <p id="gameOverMessage"></p>
+        <div class="result-grid">
+          <div>
+            <span>White clock</span>
+            <strong id="finalWhiteClock">20:00</strong>
+          </div>
+          <div>
+            <span>Black clock</span>
+            <strong id="finalBlackClock">20:00</strong>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="reviewBoardButton" class="ghost-button dark-ghost" type="button">Review Board</button>
+          <button id="playAgainButton" class="primary-button" type="button">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
